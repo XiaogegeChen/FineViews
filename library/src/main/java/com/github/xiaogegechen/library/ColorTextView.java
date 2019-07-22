@@ -15,7 +15,7 @@ public class ColorTextView extends View {
     private static final String TAG = "ColorNumber";
 
     /**
-     * 默认字体大小为50px
+     * 默认字体大小为300px
      */
     private static final int TEXT_SIZE_DEFAULT = 300;
     private static final int SIZE_DEFAULT = 150;

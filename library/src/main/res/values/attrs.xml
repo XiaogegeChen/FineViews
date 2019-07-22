@@ -6,4 +6,16 @@
         <attr name="text" format="string"/>
         <attr name="text_size" format="dimension"/>
     </declare-styleable>
+    
+    <declare-styleable name="CornerButton">
+        <attr name="corner_button_start_color" format="color"/>
+        <attr name="corner_button_end_color" format="color"/>
+        <attr name="corner_button_border_color" format="color"/>
+        <attr name="corner_button_text_color" format="color"/>
+        <attr name="corner_button_border_width" format="dimension"/>
+        <attr name="corner_button_text" format="string"/>
+        <attr name="corner_button_text_size" format="dimension"/>
+        <attr name="corner_button_icon" format="reference"/>
+        <attr name="corner_button_distance" format="dimension"/>
+    </declare-styleable>
 </resources>

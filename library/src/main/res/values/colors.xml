@@ -2,4 +2,9 @@
 <resources>
     <color name="color_text_view_start_color">#ff3d72</color>
     <color name="color_text_view_end_color">#fea546</color>
+
+    <color name="corner_button_start_color">#fe3a73</color>
+    <color name="corner_button_end_color">#fdaa44</color>
+    <color name="corner_button_border_color">#00fea546</color>
+    <color name="corner_button_text_color">#ffffff</color>
 </resources>

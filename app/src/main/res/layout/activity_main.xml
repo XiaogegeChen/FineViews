@@ -6,10 +6,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <com.github.xiaogegechen.library.ColorTextView
+        android:id="@+id/color_text_view"
         android:layout_width="200dp"
         android:layout_height="200dp"
         app:start_color="@color/color_text_view_start_color"
         app:end_color="@color/color_text_view_end_color"
         app:text="98"
         app:text_size="100sp"/>
+    <com.github.xiaogegechen.library.CornerButton
+        android:layout_marginLeft="20dp"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        app:corner_button_icon="@drawable/qq"
+        app:corner_button_border_width="4dp"
+        app:corner_button_border_color="#000000"
+        app:corner_button_distance="8dp"
+        app:corner_button_text_size="20sp"
+        app:corner_button_text="分享"/>
 </LinearLayout>
