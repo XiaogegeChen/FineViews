@@ -1,5 +1,5 @@
 [![](https://jitpack.io/v/XiaogegeChen/FineViews.svg)](https://jitpack.io/#XiaogegeChen/FineViews)
-# ColorTextView （渐变色文字）
+# 1. ColorTextView （渐变色文字）
 ## 效果图
 ![0](https://github.com/XiaogegeChen/FineViews/blob/master/screenshot/color_text_view.png)
 ## 快速使用
@@ -35,7 +35,7 @@ implementation 'com.github.xiaogegeChen:fineviews:1.0.0'
 ```app:end_color```   渐变结束颜色<br/>
 ```app:text```   文字<br/>
 ```app:text_size```   文字字号<br/>
-# CornerButton （带图标的圆角button）
+# 2. CornerButton （带图标的圆角button）
 ## 效果图
 ![0](https://github.com/XiaogegeChen/FineViews/blob/master/screenshot/corner_button.png)
 ## 快速使用
