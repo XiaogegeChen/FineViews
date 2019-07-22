@@ -14,7 +14,7 @@ allprojects {
     }
 }
 ```
-2.在工程目录的build.gradle中添加依赖(查看最上面的版本号进行替换)
+2.在工程目录的build.gradle中添加依赖(1.0.0版本或更高)
 ```
 implementation 'com.github.xiaogegeChen:fineviews:1.0.0'
 ```
@@ -30,9 +30,54 @@ implementation 'com.github.xiaogegeChen:fineviews:1.0.0'
         app:text_size="100sp"/>
 ```
 
-## 可配置的属性（请更新至最新版本）
+## 可配置的属性
 ```app:start_color```   渐变开始颜色<br/>
 ```app:end_color```   渐变结束颜色<br/>
 ```app:text```   文字<br/>
 ```app:text_size```   文字字号<br/>
+# CornerButton （带图标的圆角button）
+## 效果图
+![0](https://github.com/XiaogegeChen/FineViews/blob/master/screenshot/corner_button.png)
+## 快速使用
+1.在工程根目录的build.gradle中添加依赖
+```
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        
+        maven { url 'https://jitpack.io' } 
+    }
+}
+```
+2.在工程目录的build.gradle中添加依赖(1.1.0版本或更高)
+```
+implementation 'com.github.xiaogegeChen:fineviews:1.1.0'
+```
+3.在xml中配置
+```
+<com.github.xiaogegechen.library.CornerButton
+        android:id="@+id/share_button"
+        android:layout_marginLeft="20dp"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        app:corner_button_icon="@drawable/qq"
+        app:corner_button_border_color="#000000"
+        app:corner_button_distance="1dp"
+        app:corner_button_text_size="20sp"
+        app:corner_button_text="分享"/>
+```
+
+## 可配置的属性
+```app:corner_button_start_color```   渐变开始颜色<br/>
+```app:corner_button_end_color```   渐变结束颜色<br/>
+```app:corner_button_border_color```   边框颜色<br/>
+```app:corner_button_text_color```   文字颜色<br/>
+```app:corner_button_border_width```   边框线宽<br/>
+```app:corner_button_text```   文字<br/>
+```app:corner_button_text_size```   文字字号<br/>
+```app:corner_button_icon```   图标<br/>
+```app:corner_button_distance```   文字与图标的间距<br/>
 ## 更新日志
+v1.1.0
+增加CornerButton
