@@ -8,17 +8,19 @@
     android:layout_height="match_parent">
     <com.github.xiaogegechen.library.ColorTextView
         android:id="@+id/color_text_view"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
         app:start_color="@color/color_text_view_start_color"
         app:end_color="@color/color_text_view_end_color"
         app:text="98"
-        app:text_size="100sp"/>
+        app:text_size="100sp"
+        app:text_gravity="center"/>
     <com.github.xiaogegechen.library.CornerButton
         android:id="@+id/share_button"
         android:layout_marginLeft="20dp"
-        android:layout_width="100dp"
-        android:layout_height="40dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:corner_button_icon="@drawable/qq"
         app:corner_button_border_color="#000000"
         app:corner_button_distance="1dp"
@@ -39,4 +41,21 @@
         app:corner_button_distance="1dp"
         app:corner_button_text_size="20sp"
         app:corner_button_text="白羊座"/>
+    <Button
+        android:id="@+id/button"
+        android:text="hello"
+        android:paddingLeft="10dp"
+        android:paddingTop="0dp"
+        android:paddingBottom="10dp"
+        android:layout_width="100dp"
+        android:layout_height="50dp"/>
+    <TextView
+        android:text="hello"
+        android:gravity="left|center_vertical"
+        android:paddingRight="30dp"
+        android:paddingLeft="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:textColor="@color/colorAccent"
+        android:textSize="30sp" />
 </LinearLayout>
