@@ -51,9 +51,9 @@ allprojects {
     }
 }
 ```
-2.在工程目录的build.gradle中添加依赖(1.1.0版本或更高)
+2.在工程目录的build.gradle中添加依赖(1.2.0版本或更高)
 ```
-implementation 'com.github.xiaogegeChen:fineviews:1.1.0'
+implementation 'com.github.xiaogegeChen:fineviews:1.2.0'
 ```
 3.在xml中配置
 ```
