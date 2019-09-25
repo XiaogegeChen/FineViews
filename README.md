@@ -35,6 +35,7 @@ implementation 'com.github.xiaogegeChen:fineviews:1.0.0'
 ```app:end_color```   渐变结束颜色<br/>
 ```app:text```   文字<br/>
 ```app:text_size```   文字字号<br/>
+```app:text_gravity```   文字位置，取值与```android:gravity```相同<br/>
 # 2. CornerButton （带图标的圆角button）
 ## 效果图
 ![0](https://github.com/XiaogegeChen/FineViews/blob/master/screenshot/corner_button.png)
@@ -81,3 +82,9 @@ implementation 'com.github.xiaogegeChen:fineviews:1.1.0'
 ## 更新日志
 v1.1.0
 增加CornerButton
+
+v1.2.0
+* ColorTextView添加```text_gravity```属性，取值与```android:gravity```相同
+* ColorTextView在宽高指定时，如果文字显示不下，将不会显示
+* 优化尺寸未指定时的尺寸确定方式，取消默认大小，自动测量
+
