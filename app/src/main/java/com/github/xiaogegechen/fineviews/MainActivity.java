@@ -41,7 +41,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d (TAG, "onClick: ");
-                mShareButton.setIcon (R.drawable.change);
+//                mShareButton.setIcon (R.drawable.change);
+                int random = new Random().nextInt(TEST.length);
+                String content = TEST[random];
+                mShareButton.setText(content);
             }
         });
         mButton.setOnClickListener(new View.OnClickListener() {

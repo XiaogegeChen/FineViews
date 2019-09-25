@@ -73,6 +73,7 @@ public class ColorTextView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if(Consts.COLOR_TEXT_VIEW_DEBUG)Log.d(TAG, "perform measure");
         super.onMeasure (widthMeasureSpec, heightMeasureSpec);
         int widthMode = MeasureSpec.getMode (widthMeasureSpec);
         int widthSize = MeasureSpec.getSize (widthMeasureSpec);
@@ -121,6 +122,7 @@ public class ColorTextView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if(Consts.COLOR_TEXT_VIEW_DEBUG)Log.d(TAG, "perform draw");
         super.onDraw (canvas);
         if(Consts.COLOR_TEXT_VIEW_DEBUG)Log.d (TAG, "width is: " + getWidth () + ", height is: " + getHeight ());
 

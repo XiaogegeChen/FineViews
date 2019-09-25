@@ -25,22 +25,25 @@
         app:corner_button_border_color="#000000"
         app:corner_button_distance="1dp"
         app:corner_button_text_size="20sp"
+        app:corner_button_padding_top="30dp"
+        app:corner_button_padding_bottom="40dp"
+        android:padding="30dp"
         app:corner_button_text="分享"/>
-    <com.github.xiaogegechen.library.CornerButton
-        android:layout_marginTop="10dp"
-        android:padding="2dp"
-        android:layout_marginLeft="20dp"
-        android:layout_width="100dp"
-        android:layout_height="40dp"
-        app:corner_button_icon="@drawable/change"
-        app:corner_button_start_color="#00000000"
-        app:corner_button_end_color="#00000000"
-        app:corner_button_text_color="#e7e8ea"
-        app:corner_button_border_color="#e7e8ea"
-        app:corner_button_border_width="2dp"
-        app:corner_button_distance="1dp"
-        app:corner_button_text_size="20sp"
-        app:corner_button_text="白羊座"/>
+<!--    <com.github.xiaogegechen.library.CornerButton-->
+<!--        android:layout_marginTop="10dp"-->
+<!--        android:padding="2dp"-->
+<!--        android:layout_marginLeft="20dp"-->
+<!--        android:layout_width="100dp"-->
+<!--        android:layout_height="40dp"-->
+<!--        app:corner_button_icon="@drawable/qq"-->
+<!--        app:corner_button_start_color="#00000000"-->
+<!--        app:corner_button_end_color="#00000000"-->
+<!--        app:corner_button_text_color="#e7e8ea"-->
+<!--        app:corner_button_border_color="#e7e8ea"-->
+<!--        app:corner_button_border_width="2dp"-->
+<!--        app:corner_button_distance="1dp"-->
+<!--        app:corner_button_text_size="20sp"-->
+<!--        app:corner_button_text="白羊座"/>-->
     <Button
         android:id="@+id/button"
         android:text="hello"

@@ -5,9 +5,11 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
@@ -17,9 +19,12 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.DrawableRes;
+
 /**
- * 圆角button，右侧带有一个图标，padding仿照button的设计
- * 内容在水平居中，竖直方向的padding为内容的padding，不包括边框
+ * 圆角button，右侧带有一个图标，因为边界的线条有可能显示不完全
+ * 所以使用时候要注意设置padding
+ * 同时提供内容与边界的上下padding,左右强制居中,保证美观
  */
 public class CornerButton extends View {
 
@@ -28,8 +33,8 @@ public class CornerButton extends View {
     private static final int BORDER_WIDTH_DEFAULT = 0;
     private static final int TEXT_SIZE_DEFAULT = 40;
     private static final int DISTANCE_DEFAULT = 0;
-    // 默认的padding
-    private static final int PADDING_DEFAULT = 10;
+    private static final int INNER_PADDING_TOP_DEFAULT = 10;
+    private static final int INNER_PADDING_BOTTOM_DEFAULT = 10;
 
     private int mStartColor;
     private int mEndColor;
@@ -40,6 +45,8 @@ public class CornerButton extends View {
     private int mTextSize;
     private Drawable mIcon;
     private int mDistance;
+    private int mInnerPaddingTop;
+    private int mInnerPaddingBottom;
 
     private Paint mTextPaint;
     private Paint mBgPaint;
@@ -49,6 +56,8 @@ public class CornerButton extends View {
     // 不需要重新布局的，如果不是精确模式，那么有的属性动态更改之后
     // 需要重新布局。这样可以避免不需要的重新布局，提高性能
     private boolean mIsSizeExactly = false;
+    private boolean mIsWidthExactly = false;
+    private boolean mIsHeightExactly = false;
 
     public CornerButton(Context context) {
         this (context, null);
@@ -71,6 +80,8 @@ public class CornerButton extends View {
         mTextSize = a.getDimensionPixelSize (R.styleable.CornerButton_corner_button_text_size, TEXT_SIZE_DEFAULT);
         mIcon = a.getDrawable (R.styleable.CornerButton_corner_button_icon);
         mDistance = a.getDimensionPixelSize (R.styleable.CornerButton_corner_button_distance, DISTANCE_DEFAULT);
+        mInnerPaddingTop = a.getDimensionPixelSize(R.styleable.CornerButton_corner_button_padding_top, INNER_PADDING_TOP_DEFAULT);
+        mInnerPaddingBottom = a.getDimensionPixelSize(R.styleable.CornerButton_corner_button_padding_bottom, INNER_PADDING_BOTTOM_DEFAULT);
         a.recycle ();
 
         // 可点击
@@ -101,6 +112,7 @@ public class CornerButton extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if(Consts.CORNER_BUTTON_DEBUG)Log.d(TAG, "perform measure");
         super.onMeasure (widthMeasureSpec, heightMeasureSpec);
         int widthMode = MeasureSpec.getMode (widthMeasureSpec);
         int widthSize = MeasureSpec.getSize (widthMeasureSpec);
@@ -115,12 +127,21 @@ public class CornerButton extends View {
             if(Consts.CORNER_BUTTON_DEBUG)Log.d(TAG, "Measure exactly");
             //更新标记位
             mIsSizeExactly = true;
+            mIsHeightExactly = true;
+            mIsWidthExactly = true;
             setMeasuredDimension(widthSize, heightSize);
             return;
         }
+        mIsSizeExactly = false;
 
         int width;
         int height;
+
+        // padding
+        int paddingLeft = getPaddingLeft();
+        int paddingRight = getPaddingRight();
+        int paddingTop = getPaddingTop();
+        int paddingBottom = getPaddingBottom();
 
         // 文字宽高
         int textHeight = mTextBound.height ();
@@ -137,25 +158,23 @@ public class CornerButton extends View {
 
         // 高
         if(heightMode == MeasureSpec.EXACTLY){
+            mIsHeightExactly = true;
             height = heightSize;
         }else{
-            // 如果没有设置padding，那就使用默认值
-            if(getPaddingTop() == 0 && getPaddingBottom() == 0){
-                height = mTextBound.height() + PADDING_DEFAULT * 2;
-            }else{
-                // 如果有设置padding，那么也要再加上默认值，美观
-                height = mTextBound.height() + getPaddingBottom() + getPaddingTop() + PADDING_DEFAULT * 2;
-            }
+            mIsHeightExactly = false;
+            height = paddingBottom + paddingTop + textHeight + mInnerPaddingBottom + mInnerPaddingTop;
         }
 
         // 宽，忽略使用者设置的padding
         if(widthMode == MeasureSpec.EXACTLY){
+            mIsWidthExactly = true;
             width = widthSize;
         }else{
             // 默认的宽是内容刚好不在圆内
-            width = contentWidth + height;
+            mIsWidthExactly = false;
+            width = contentWidth + (textHeight + mInnerPaddingBottom + mInnerPaddingTop) + paddingLeft + paddingRight;
         }
-
+        Log.d(TAG, "view size, width is : " + width + ", height is : " + height);
         setMeasuredDimension(width, height);
     }
 
@@ -167,34 +186,48 @@ public class CornerButton extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if(Consts.CORNER_BUTTON_DEBUG)Log.d(TAG, "perform draw");
         super.onDraw (canvas);
+
+        // 重新测量文本范围，因为如果是动态更改而且还是精确测量模式
+        // 那么不执行onMeasure()，也就没有测量新的文本范围
+        mTextPaint.getTextBounds (mText, 0, mText.length (), mTextBound);
+
         // 宽高和内边距
         int width = getWidth ();
         int height = getHeight ();
-        int paddingLeft = getPaddingLeft ();
-        int paddingRight = getPaddingRight ();
+        int paddingLeft = getPaddingLeft();
+        int paddingRight = getPaddingRight();
         int paddingTop = getPaddingTop ();
         int paddingBottom = getPaddingBottom ();
         int realWidth = width - paddingLeft - paddingRight;
-        int realHeight = height - paddingTop - paddingBottom;
+        int realHeight = height - paddingBottom - paddingTop;
+
+        // 着色器的顶点坐标,让view居中，即使使用者设置的四周padding不一样也要居中，美观！
+        float left = (float) ((paddingLeft + paddingRight) * 1.0 / 2);
+        float right = width - (float) ((paddingTop + paddingBottom) * 1.0 / 2);
+        float top = (float) ((paddingTop + paddingBottom) * 1.0 / 2);
+        float bottom = height - (float) ((paddingTop + paddingBottom) * 1.0 / 2);
+
         // (1)画背景
         if(Consts.CORNER_BUTTON_DEBUG)Log.d(TAG, "draw background");
+        // 定位圆角button的位置
         if (mBgLinearGradient == null) {
-            mBgLinearGradient = new LinearGradient (paddingLeft, paddingTop, paddingLeft + realWidth, paddingTop + realHeight, mStartColor, mEndColor, Shader.TileMode.REPEAT);
+            mBgLinearGradient = new LinearGradient (left, top, right, bottom, mStartColor, mEndColor, Shader.TileMode.REPEAT);
         }
         mBgPaint.setShader (mBgLinearGradient);
         if(realWidth <= realHeight){
             // 背景是圆形
-            canvas.drawCircle ((float) (realWidth * 1.0 / 2 + paddingLeft), (float) (realHeight * 1.0 / 2 + paddingTop), (float) (realWidth * 1.0 / 2), mBgPaint);
+            canvas.drawCircle ((float) ((left + right) * 1.0 / 2), (float) ((top + bottom) * 1.0 / 2), (float) (realWidth * 1.0 / 2), mBgPaint);
         } else {
             // 背景是圆角矩形
             float r = (float) (realHeight * 1.0 / 2);
-            mLeftRectF.set (paddingLeft, paddingTop, paddingLeft + r * 2, paddingTop + r * 2);
-            mRightRectF.set (paddingLeft + realWidth - r * 2, paddingTop, paddingLeft + realWidth, paddingTop + r * 2);
-            mBorderPath.moveTo (paddingLeft + realWidth - r , paddingTop + realHeight);
-            mBorderPath.lineTo (paddingLeft + r, paddingTop + realHeight);
+            mLeftRectF.set (left, top, left + r * 2, top + r * 2);
+            mRightRectF.set (right - r * 2, bottom - r * 2, right, bottom);
+            mBorderPath.moveTo (right - r , bottom);
+            mBorderPath.lineTo (left + r, bottom);
             mBorderPath.arcTo (mLeftRectF, 90, 180, false);
-            mBorderPath.lineTo (paddingLeft + realWidth - r , paddingTop);
+            mBorderPath.lineTo (right - r , top);
             mBorderPath.arcTo (mRightRectF, 270, 180, false);
             canvas.drawPath (mBorderPath, mBgPaint);
         }
@@ -203,7 +236,7 @@ public class CornerButton extends View {
         if(Consts.CORNER_BUTTON_DEBUG)Log.d(TAG, "draw border");
         if(realWidth <= realHeight){
             // 边框是圆形
-            canvas.drawCircle ((float) (realWidth * 1.0 / 2 + paddingLeft), (float) (realHeight * 1.0 / 2 + paddingTop), (float) (realWidth * 1.0 / 2), mBorderPaint);
+            canvas.drawCircle ((float) ((left + right) * 1.0 / 2), (float) ((top + bottom) * 1.0 / 2), (float) (realWidth * 1.0 / 2), mBorderPaint);
         } else {
             // 边框是圆角矩形
             canvas.drawPath (mBorderPath, mBorderPaint);
@@ -212,32 +245,47 @@ public class CornerButton extends View {
         // (3)确定文字位置，画文字
         if(Consts.CORNER_BUTTON_DEBUG)Log.d(TAG, "draw text");
         mTextPaint.getTextBounds (mText, 0, mText.length (), mTextBound);
-        // 文字宽高
-        int textHeight = mTextBound.height ();
-        int textWidth = mTextBound.width ();
-        // 图标原始宽高
-        int iconWidth = mIcon.getIntrinsicWidth();
-        int iconHeight = mIcon.getIntrinsicHeight ();
-        // 缩放比
+        // 文字、图标、内容宽高
+        int textHeight;
+        int textWidth;
+        int iconWidth;
+        int iconHeight;
+        int contentWidth;
+
+        // 绘制的文字位置, textPositionX是文本重点横坐标,textPositionY是文本基线纵坐标
+        float textPositionX;
+        float textPositionY;
+
+        textHeight = mTextBound.height ();
+        textWidth = mTextBound.width ();
+        iconWidth = mIcon.getIntrinsicWidth();
+        iconHeight = mIcon.getIntrinsicHeight ();
+        // 为了保证文字和图标等高，需要对图标缩放
         float scale = (float) (textHeight * 1.0 / iconHeight);
-        // 图标宽高
         iconHeight = textHeight;
         iconWidth = (int) (iconWidth * scale);
-        // 内容宽
-        int contentWidth = textWidth + iconWidth + mDistance;
-        float textPositionX = (float) (paddingLeft + (realWidth - contentWidth + textWidth) * 1.0 / 2);
-        float textPositionY = paddingTop + (float)(realHeight * 1.0 / 2) - (mTextPaint.getFontMetrics ().top + mTextPaint.getFontMetrics ().bottom) / 2;
+        contentWidth = textWidth + iconWidth + mDistance;
+
+        // 如果圆角button装不下文字和图标，那就不显示内容
+        // 这种情况只会发生在使用者指定了宽高的情况下，没指定的情况下
+        // 不会发生
+        if(mIsWidthExactly && contentWidth > realWidth)return;
+        if(mIsHeightExactly && textHeight > realHeight)return;
+
+        textPositionX = (float) ((left + right + textWidth - contentWidth) * 1.0 / 2);
+        textPositionY = top + (float)(realHeight * 1.0 / 2) - (mTextPaint.getFontMetrics ().top + mTextPaint.getFontMetrics ().bottom) / 2 + (float) (((mInnerPaddingTop - mInnerPaddingBottom) * 1.0) / 2);
         canvas.drawText (mText, textPositionX, textPositionY, mTextPaint);
 
         // (4)确定图标位置,画图标
         if(Consts.CORNER_BUTTON_DEBUG)Log.d(TAG, "draw icon");
-        int iconLeft = paddingLeft + (realWidth - contentWidth) / 2 + textWidth + mDistance;
-        int iconTop = paddingTop + (realHeight - iconHeight) / 2;
+        int iconLeft = (int) (textPositionX + (textWidth * 1.0) / 2 + mDistance);
+        int iconTop = (int) (top + mInnerPaddingTop);
         int iconRight = iconLeft + iconWidth;
         int iconBottom = iconTop + iconHeight;
         mIcon.setBounds (iconLeft, iconTop, iconRight, iconBottom);
-        canvas.save ();
         mIcon.draw (canvas);
+        canvas.save();
+        canvas.restore();
     }
 
     // 动态设置属性
@@ -293,18 +341,16 @@ public class CornerButton extends View {
             invalidate();
         }else{
             requestLayout();
+//            // 不知道为什么图标更改不会导致requestLayout()执行measure流程
+//            // 先手动设置
+//            invalidate ();
         }
     }
 
-    public void setIcon(int resourceId){
+    public void setIcon(@DrawableRes int resourceId){
         Bitmap bitmap = BitmapFactory.decodeResource (getResources (), resourceId);
-        mIcon = new BitmapDrawable (bitmap);
-        // 文字改变会改变view的尺寸，因此应该重新布局
-        if(mIsSizeExactly){
-            invalidate();
-        }else{
-            requestLayout();
-        }
+        BitmapDrawable drawable = new BitmapDrawable(getResources(), bitmap);
+        setIcon(drawable);
     }
 
     public void setDistance(int distance) {

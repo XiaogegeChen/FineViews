@@ -26,5 +26,7 @@
         <attr name="corner_button_text_size" format="dimension"/>
         <attr name="corner_button_icon" format="reference"/>
         <attr name="corner_button_distance" format="dimension"/>
+        <attr name="corner_button_padding_top" format="dimension"/>
+        <attr name="corner_button_padding_bottom" format="dimension"/>
     </declare-styleable>
 </resources>
