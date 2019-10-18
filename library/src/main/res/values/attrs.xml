@@ -29,4 +29,13 @@
         <attr name="corner_button_padding_top" format="dimension"/>
         <attr name="corner_button_padding_bottom" format="dimension"/>
     </declare-styleable>
+
+    <declare-styleable name="MenuView">
+        <attr name="menu_view_orientation" format="enum">
+            <enum name="horizontal" value="0" />
+            <enum name="vertical" value="1" />
+        </attr>
+        <attr name="menu_view_reverse" format="boolean"/>
+        <attr name="menu_view_animation_duration" format="integer"/>
+    </declare-styleable>
 </resources>

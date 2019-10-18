@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="80dp">
+    <ImageView
+        android:background="#33334c"
+        android:id="@+id/item_image"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:padding="10dp"
+        android:src="@drawable/ic_cancel"/>
+    <View
+        android:background="#37374d"
+        android:id="@+id/item_split"
+        android:layout_width="1dp"
+        android:layout_height="80dp"/>
+</LinearLayout>
