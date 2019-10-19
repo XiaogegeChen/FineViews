@@ -60,6 +60,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="1"
         app:menu_view_orientation="horizontal"
-        app:menu_view_animation_duration="100"
+        app:menu_view_animation_duration="50"
         app:menu_view_reverse="true"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

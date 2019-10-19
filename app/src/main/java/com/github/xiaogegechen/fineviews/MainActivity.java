@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private static List<Item> sItemList = new ArrayList<>();
 
     static {
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 7; i++) {
             Item item = new Item(R.drawable.ic_cancel, Color.parseColor("#33334c"), Color.parseColor("#c74870"));
             sItemList.add(item);
         }
