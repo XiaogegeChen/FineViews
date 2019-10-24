@@ -79,6 +79,47 @@ implementation 'com.github.xiaogegeChen:fineviews:1.2.0'
 ```app:corner_button_text_size```   文字字号<br/>
 ```app:corner_button_icon```   图标<br/>
 ```app:corner_button_distance```   文字与图标的间距<br/>
+
+# 3. MenuView （带动画效果的菜单栏）
+## 效果图
+![0](https://github.com/XiaogegeChen/FineViews/blob/master/screenshot/menu_view.gif)
+## 快速使用
+1.在工程根目录的build.gradle中添加依赖
+```
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        
+        maven { url 'https://jitpack.io' } 
+    }
+}
+```
+2.在工程目录的build.gradle中添加依赖(1.3.0版本或更高)
+```
+implementation 'com.github.xiaogegeChen:fineviews:1.3.0'
+```
+3.在xml中配置
+```
+<com.github.xiaogegechen.library.MenuView
+        android:id="@+id/menu_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="1"
+        app:menu_view_orientation="horizontal"
+        app:menu_view_animation_duration="50"
+        app:menu_view_reverse="true"/>
+```
+
+## 可配置的属性
+```app:menu_view_orientation```   方向，有竖直或者水平方向<br/>
+```app:menu_view_reverse```   动画执行方向是否反转<br/>
+```app:menu_view_animation_duration```   单个子View的动画时长<br/>
+
 ## 更新日志
 v1.1.0
 增加CornerButton
@@ -88,3 +129,5 @@ v1.2.0
 * ColorTextView在宽高指定时，如果文字显示不下，将不会显示
 * 优化尺寸未指定时的尺寸确定方式，取消默认大小，自动测量
 
+v1.3.0
+* 增加MenuView
