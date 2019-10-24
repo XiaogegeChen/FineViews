@@ -2,6 +2,7 @@ package com.github.xiaogegechen.fineviews;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.animation.Animator;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -64,6 +65,30 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.cons_button).setOnClickListener(v -> {
             mMenuView.open();
         });
+
+        mMenuView.setOpenAnimatorListener(new MenuView.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                Log.d(TAG, "start open");
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                Log.d(TAG, "end open");
+            }
+        });
+
+        mMenuView.setCloseAnimatorListener(new MenuView.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                Log.d(TAG, "start close");
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                Log.d(TAG, "end close");
+            }
+        });
     }
 
     static class Adapter extends MenuView.Adapter {
@@ -108,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 // 响应点击
-                mMenuView.close();
+                mMenuView.close(1, 3);
             });
             mViewMap.put(position, view);
             return view;

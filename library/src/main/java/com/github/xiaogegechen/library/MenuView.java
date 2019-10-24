@@ -34,6 +34,44 @@ public class MenuView extends FrameLayout {
     private static final String TAG = "MenuView";
 
     /**
+     * Adapter类，负责子View的创建和点击事件等。和ListView的Adapter使用方式类似，但是需要注意getView()方法不要复用
+     * 之前的View，因为在之后的打开和关闭动画中都要直接操作这些View。
+     */
+    public static abstract class Adapter {
+        /**
+         * 创建子View，这里需要每一个position处都返回一个新的View，因为之后的动画需要单独操作每一个View，因此不使用
+         * View的复用机制
+         * @param position 子View的位置
+         * @param parent 这个View的父ViewGroup，如果没有特殊情况，一定是一个LinearLayout
+         * @return 指定位置上的View，一定是一个新的View对象，不能复用之前的View
+         */
+        public abstract View getView(int position, ViewGroup parent);
+
+        /**
+         * 拿到子View的个数
+         * @return 子View的个数
+         */
+        public abstract int getCount();
+    }
+
+    /**
+     * 动画监听器
+     */
+    public interface AnimatorListener{
+        /**
+         * 动画开始前回调
+         * @param animation 动画
+         */
+        void onAnimationStart(Animator animation);
+
+        /**
+         * 动画结束后回调
+         * @param animation 动画
+         */
+        void onAnimationEnd(Animator animation);
+    }
+
+    /**
      * 方向
      */
     @IntDef({
@@ -75,6 +113,9 @@ public class MenuView extends FrameLayout {
     // 开闭动画，各个view复用，减少内存消耗
     private ObjectAnimator mOpenAnimator;
     private ObjectAnimator mCloseAnimator;
+    // 动画监听
+    private AnimatorListener mOpenAnimatorListener;
+    private AnimatorListener mCloseAnimatorListener;
     // 当前动画迭代到的view
     private int mCurrentIndex = 0;
     // 当前状态
@@ -125,12 +166,54 @@ public class MenuView extends FrameLayout {
         }
     }
 
+    public void setOpenAnimatorListener(AnimatorListener openAnimatorListener) {
+        mOpenAnimatorListener = openAnimatorListener;
+    }
+
+    public void setCloseAnimatorListener(AnimatorListener closeAnimatorListener) {
+        mCloseAnimatorListener = closeAnimatorListener;
+    }
+
     /**
-     * 展开这个view，如果已经处于展开状态或者正在动画，将不处理
+     * 展开整个menuView，如果已经处于展开状态或者正在动画，将不处理。这个方法展开menuView中所有的子View
      *
-     * @see #close()
+     * @see #open(int, int)
      */
     public void open(){
+        int startIndex = 0;
+        int endIndex = mLinearLayout.getChildCount() - 1;
+        open(startIndex, endIndex);
+    }
+
+    /**
+     * 展开局部的menuView，如果已经处于展开状态或者正在动画，将不处理。这个方法展开局部的子View，通过指定开始位置和结束
+     * 位置来指定展开区间
+     * @param startIndex 开始位置下标
+     * @param endIndex 结束位置下标
+     *
+     * @see #open()
+     */
+    public void open(int startIndex, int endIndex){
+        // 调整下标范围，保证不会越界
+        if(startIndex < 0){
+            startIndex = 0;
+        }
+        int count = mLinearLayout.getChildCount();
+        if(endIndex > (count - 1)){
+            endIndex = count - 1;
+        }
+        openInternal(startIndex, endIndex);
+    }
+
+    /**
+     * 展开动画，如果已经处于展开状态或者正在动画，将不处理。内部使用，调用时需要保证不会发生数组越界
+     * @param startIndex 开始位置下标
+     * @param endIndex 结束位置下标
+     *
+     * @see #open()
+     * @see #open(int, int)
+     */
+    private void openInternal(final int startIndex, final int endIndex){
         // 设置旋转中心
         setPivot();
         // 正在动画或者已经打开不处理
@@ -154,12 +237,12 @@ public class MenuView extends FrameLayout {
         View firstAnimatedChild;
         if(mIsReverse){
             // 反向从最后一个开始
-            mCurrentIndex = count - 1;
-            firstAnimatedChild = mLinearLayout.getChildAt(count - 1);
+            mCurrentIndex = count - 1 - startIndex;
+            firstAnimatedChild = mLinearLayout.getChildAt(mCurrentIndex);
         }else{
             // 正常从第一个开始
-            mCurrentIndex = 0;
-            firstAnimatedChild = mLinearLayout.getChildAt(0);
+            mCurrentIndex = startIndex;
+            firstAnimatedChild = mLinearLayout.getChildAt(mCurrentIndex);
         }
         mOpenAnimator = ObjectAnimator.ofFloat(firstAnimatedChild, property, 90, 0);
         mOpenAnimator.setInterpolator(mInterpolator);
@@ -172,11 +255,13 @@ public class MenuView extends FrameLayout {
                 if(mIsReverse){
                     // 反向要向上迭代
                     mCurrentIndex --;
-                    if(mCurrentIndex > -1){
+                    if(mCurrentIndex > (count - 1 - endIndex - 1)){
                         mOpenAnimator.setTarget(mLinearLayout.getChildAt(mCurrentIndex));
                         mOpenAnimator.start();
                     }else{
                         if(Consts.MENU_VIEW_DEBUG) Log.d(TAG, "open animation finish");
+                        // 监听动画结束
+                        notifyOpenAnimationEnd();
                         // 清空
                         mOpenAnimator = null;
                         mStatus = OPEN;
@@ -184,11 +269,13 @@ public class MenuView extends FrameLayout {
                 }else{
                     // 正常向下迭代
                     mCurrentIndex ++;
-                    if(mCurrentIndex < count){
+                    if(mCurrentIndex < (endIndex + 1)){
                         mOpenAnimator.setTarget(mLinearLayout.getChildAt(mCurrentIndex));
                         mOpenAnimator.start();
                     }else{
                         if(Consts.MENU_VIEW_DEBUG) Log.d(TAG, "open animation finish");
+                        // 监听动画结束
+                        notifyOpenAnimationEnd();
                         // 清空
                         mOpenAnimator = null;
                         mStatus = OPEN;
@@ -198,15 +285,63 @@ public class MenuView extends FrameLayout {
         });
         // 触发动画
         if(Consts.MENU_VIEW_DEBUG) Log.d(TAG, "begin to do open animation");
+        // 监听动画开始
+        notifyOpenAnimationStart();
         mOpenAnimator.start();
     }
 
+    private void notifyOpenAnimationStart(){
+        if(mOpenAnimatorListener != null){
+            mOpenAnimatorListener.onAnimationStart(mOpenAnimator);
+        }
+    }
+
+    private void notifyOpenAnimationEnd(){
+        if(mOpenAnimatorListener != null){
+            mOpenAnimatorListener.onAnimationEnd(mOpenAnimator);
+        }
+    }
+
     /**
-     * 关闭这个view，如果已经处于关闭状态或者正在动画，将不处理
+     * 关闭整个menuView，如果已经处于关闭状态或者正在动画，将不处理。这个方法将关闭整个menuView
      *
-     * @see #open()
+     * @see #close(int, int)
      */
     public void close(){
+        int startIndex = 0;
+        int endIndex = mLinearLayout.getChildCount() - 1;
+        close(startIndex, endIndex);
+    }
+
+    /**
+     * 关闭局部menuView，如果已经处于关闭状态或者正在动画，将不处理。这个方法将关闭指定区域的子View，通过指定起始下标和
+     * 终止下标来指定区域
+     * @param startIndex 其实下标
+     * @param endIndex 终止下标
+     *
+     * @see #close()
+     */
+    public void close(int startIndex, int endIndex){
+        // 调整下标范围，保证不会越界
+        if(startIndex < 0){
+            startIndex = 0;
+        }
+        int count = mLinearLayout.getChildCount();
+        if(endIndex > (count - 1)){
+            endIndex = count - 1;
+        }
+        closeInternal(startIndex, endIndex);
+    }
+
+    /**
+     * 关闭动画，内部使用，调用时需要保证不会发生数组越界
+     * @param startIndex 开始位置下标
+     * @param endIndex 结束位置下标
+     *
+     * @see #close()
+     * @see #close(int, int)
+     */
+    private void closeInternal(final int startIndex, final int endIndex){
         // 设置旋转中心
         setPivot();
         // 正在动画或者已经关闭不处理
@@ -228,12 +363,12 @@ public class MenuView extends FrameLayout {
         View firstAnimatedChild;
         if(mIsReverse){
             // 反向从第一个开始关闭
-            mCurrentIndex = 0;
-            firstAnimatedChild = mLinearLayout.getChildAt(0);
+            mCurrentIndex = count - 1- endIndex;
+            firstAnimatedChild = mLinearLayout.getChildAt(mCurrentIndex);
         }else{
             // 正常从最后一个开始关闭
-            mCurrentIndex = count - 1;
-            firstAnimatedChild = mLinearLayout.getChildAt(count - 1);
+            mCurrentIndex = endIndex;
+            firstAnimatedChild = mLinearLayout.getChildAt(mCurrentIndex);
         }
         mCloseAnimator = ObjectAnimator.ofFloat(firstAnimatedChild, property, 0, 90);
         mCloseAnimator.setInterpolator(mInterpolator);
@@ -246,11 +381,13 @@ public class MenuView extends FrameLayout {
                 if(mIsReverse){
                     // 反向向下迭代
                     mCurrentIndex ++;
-                    if(mCurrentIndex < count){
+                    if(mCurrentIndex < (count - 1 - startIndex + 1)){
                         mCloseAnimator.setTarget(mLinearLayout.getChildAt(mCurrentIndex));
                         mCloseAnimator.start();
                     }else{
                         if(Consts.MENU_VIEW_DEBUG) Log.d(TAG, "close animation finish");
+                        // 监听动画结束
+                        notifyCloseAnimationEnd();
                         // 清空
                         mCloseAnimator = null;
                         mStatus = CLOSE;
@@ -258,8 +395,10 @@ public class MenuView extends FrameLayout {
                 }else{
                     // 正常向上迭代
                     mCurrentIndex --;
-                    if(mCurrentIndex == -1){
+                    if(mCurrentIndex == (startIndex - 1)){
                         if(Consts.MENU_VIEW_DEBUG) Log.d(TAG, "close animation finish");
+                        // 监听动画结束
+                        notifyCloseAnimationEnd();
                         mCloseAnimator = null;
                         mStatus = CLOSE;
                     }else{
@@ -270,7 +409,21 @@ public class MenuView extends FrameLayout {
             }
         });
         if(Consts.MENU_VIEW_DEBUG) Log.d(TAG, "begin to do close animation");
+        // 监听动画开始
+        notifyCloseAnimationStart();
         mCloseAnimator.start();
+    }
+
+    private void notifyCloseAnimationStart(){
+        if (mCloseAnimatorListener != null) {
+            mCloseAnimatorListener.onAnimationStart(mCloseAnimator);
+        }
+    }
+
+    private void notifyCloseAnimationEnd(){
+        if (mCloseAnimatorListener != null) {
+            mCloseAnimatorListener.onAnimationEnd(mCloseAnimator);
+        }
     }
 
     /**
@@ -315,26 +468,5 @@ public class MenuView extends FrameLayout {
      */
     public @StatusMode int getStatus() {
         return mStatus;
-    }
-
-    /**
-     * Adapter类，负责子View的创建和点击事件等。和ListView的Adapter使用方式类似，但是需要注意getView()方法不要复用
-     * 之前的View，因为在之后的打开和关闭动画中都要直接操作这些View。
-     */
-    public static abstract class Adapter {
-        /**
-         * 创建子View，这里需要每一个position处都返回一个新的View，因为之后的动画需要单独操作每一个View，因此不使用
-         * View的复用机制
-         * @param position 子View的位置
-         * @param parent 这个View的父ViewGroup，如果没有特殊情况，一定是一个LinearLayout
-         * @return 指定位置上的View，一定是一个新的View对象，不能复用之前的View
-         */
-        public abstract View getView(int position, ViewGroup parent);
-
-        /**
-         * 拿到子View的个数
-         * @return 子View的个数
-         */
-        public abstract int getCount();
     }
 }
