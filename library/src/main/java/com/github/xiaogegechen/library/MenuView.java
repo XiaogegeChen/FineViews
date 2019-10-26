@@ -28,6 +28,8 @@ import java.lang.annotation.RetentionPolicy;
  * @attr ref R.styleable.MenuView_menu_view_orientation 方向，纵向或者横向
  * @attr ref R.styleable.MenuView_menu_view_reverse 方向是否倒置
  * @attr ref R.styleable.MenuView_menu_view_animation_duration 动画时长
+ *
+ * @since v1.3.0
  */
 public class MenuView extends FrameLayout {
 
@@ -52,6 +54,14 @@ public class MenuView extends FrameLayout {
          * @return 子View的个数
          */
         public abstract int getCount();
+
+        /**
+         * 将特定的子View设置为选中状态
+         * @param position 子View的位置
+         *
+         * @since v1.3.2
+         */
+        public void makeViewSelected(int position){}
     }
 
     /**
@@ -122,6 +132,8 @@ public class MenuView extends FrameLayout {
     private @StatusMode int mStatus = OPEN;
     // 是否已经设置过中心点
     private boolean mHasSetPivot = false;
+    // adapter
+    private Adapter mAdapter;
 
     public MenuView(Context context) {
         this(context, null);
@@ -159,6 +171,7 @@ public class MenuView extends FrameLayout {
      * @param adapter 适配器
      */
     public void setAdapter(Adapter adapter) {
+        mAdapter = adapter;
         int count = adapter.getCount();
         for (int i = 0; i < count; i++) {
             View view = adapter.getView(i, mLinearLayout);
@@ -166,10 +179,22 @@ public class MenuView extends FrameLayout {
         }
     }
 
+    /**
+     * 设置展开动画的监听器
+     * @param openAnimatorListener 动画监听器
+     *
+     * @since v1.3.1
+     */
     public void setOpenAnimatorListener(AnimatorListener openAnimatorListener) {
         mOpenAnimatorListener = openAnimatorListener;
     }
 
+    /**
+     * 设置闭合动画的监听器
+     * @param closeAnimatorListener 动画监听器
+     *
+     * @since v1.3.1
+     */
     public void setCloseAnimatorListener(AnimatorListener closeAnimatorListener) {
         mCloseAnimatorListener = closeAnimatorListener;
     }
@@ -192,6 +217,8 @@ public class MenuView extends FrameLayout {
      * @param endIndex 结束位置下标
      *
      * @see #open()
+     *
+     * @since v1.3.1
      */
     public void open(int startIndex, int endIndex){
         // 调整下标范围，保证不会越界
@@ -212,6 +239,8 @@ public class MenuView extends FrameLayout {
      *
      * @see #open()
      * @see #open(int, int)
+     *
+     * @since v1.3.1
      */
     private void openInternal(final int startIndex, final int endIndex){
         // 设置旋转中心
@@ -320,6 +349,8 @@ public class MenuView extends FrameLayout {
      * @param endIndex 终止下标
      *
      * @see #close()
+     *
+     * @since v1.3.1
      */
     public void close(int startIndex, int endIndex){
         // 调整下标范围，保证不会越界
@@ -340,6 +371,8 @@ public class MenuView extends FrameLayout {
      *
      * @see #close()
      * @see #close(int, int)
+     *
+     * @since v1.3.1
      */
     private void closeInternal(final int startIndex, final int endIndex){
         // 设置旋转中心
@@ -440,6 +473,18 @@ public class MenuView extends FrameLayout {
      */
     public void setAnimationDuration(int animationDuration) {
         mAnimationDuration = animationDuration;
+    }
+
+    /**
+     * 使某指定的子View处于选中状态
+     * @param position 子View位置
+     *
+     * @since v1.3.2
+     */
+    public void makeViewSelected(int position){
+        if (mAdapter != null) {
+            mAdapter.makeViewSelected(position);
+        }
     }
 
     // 设置子view的旋转中心点

@@ -89,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "end close");
             }
         });
+
+        mMenuView.makeViewSelected(3);
     }
 
     static class Adapter extends MenuView.Adapter {
@@ -142,6 +144,17 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public int getCount() {
             return mItemList.size();
+        }
+
+        @Override
+        public void makeViewSelected(int position) {
+            super.makeViewSelected(position);
+            mCurrentSelectedPosition = position;
+            final Item item = mItemList.get(position);
+            final View view = mViewMap.get(position);
+            if (view != null) {
+                view.findViewById(R.id.item_image).setBackgroundColor(item.getClickedColor());
+            }
         }
     }
 }
