@@ -138,5 +138,3 @@ v1.3.1
 v1.3.2
 * 为menuView添加选中单个子View的方法
 
-v1.3.3
-* 修复menuView的bug
