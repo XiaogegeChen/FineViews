@@ -173,9 +173,16 @@ public class MenuView extends FrameLayout {
     public void setAdapter(Adapter adapter) {
         mAdapter = adapter;
         int count = adapter.getCount();
-        for (int i = 0; i < count; i++) {
-            View view = adapter.getView(i, mLinearLayout);
-            mLinearLayout.addView(view);
+        if(mIsReverse){
+            for (int i = 0; i < count; i++) {
+                View view = adapter.getView(count - 1 - i, mLinearLayout);
+                mLinearLayout.addView(view);
+            }
+        }else{
+            for (int i = 0; i < count; i++) {
+                View view = adapter.getView(i, mLinearLayout);
+                mLinearLayout.addView(view);
+            }
         }
     }
 
@@ -483,7 +490,11 @@ public class MenuView extends FrameLayout {
      */
     public void makeViewSelected(int position){
         if (mAdapter != null) {
-            mAdapter.makeViewSelected(position);
+            if(mIsReverse){
+                mAdapter.makeViewSelected(mLinearLayout.getChildCount() - 1 - position);
+            }else{
+                mAdapter.makeViewSelected(position);
+            }
         }
     }
 
